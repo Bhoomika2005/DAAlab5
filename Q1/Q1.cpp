@@ -2,8 +2,8 @@
 // region in boolean 2D-matrix
 #include <bits/stdc++.h>
 using namespace std;
-#define ROW 4
-#define COL 5
+#define ROW 50
+#define COL 50
 
 // A function to check if
 // a given cell (row, col)
@@ -85,13 +85,33 @@ int largestRegion(int M[][COL])
 // Driver code
 int main()
 {
-    int M[][COL] = {{0, 0, 1, 1, 0},
-                    {1, 0, 1, 1, 0},
-                    {0, 1, 0, 0, 0},
-                    {0, 0, 0, 0, 1}};
+    ofstream inputfile("input1.txt");
 
-    // Function call
-    cout << largestRegion(M);
+    int M[ROW][COL];
+    for (int i = 0; i < ROW; i++)
+    {
+        for (int j = 0; j < COL; j++)
+        {
+            std::mt19937 rng(std::random_device{}());
+            bool rand_bool = std::uniform_int_distribution<>{0, 1}(rng);
+            inputfile << rand_bool << " ";
+        }
+    }
+
+    inputfile.close();
+    ifstream inputFile("input1.txt");
+    for (int i = 0; i < ROW; i++)
+    {
+        for (int j = 0; j < COL; j++)
+        {
+            inputFile >> M[i][j];
+        }
+    }
+    inputFile.close();
+
+    ofstream outputfile("output1.txt");
+    outputfile << " Number of inversions are " << largestRegion(M);
+    outputfile.close();
 
     return 0;
 }
