@@ -1,91 +1,96 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-bool is_bi(vector<vector<bool>> v)
+const int V = 5;
+
+// Bipartite checking
+bool isBip(int G[][V], int src, int colorArr[])
 {
-	int n = v.size();
-	vector<int> col(n, 0);
+	colorArr[src] = 1;
+
+	// Create a queue of vertex numbers and enqueue source vertex for BFS traversal
 	queue<int> q;
-	q.push(0);
-	col[0] = 1;
+	q.push(src);
+
 	while (!q.empty())
 	{
-		int k = q.front();
+		int u = q.front();
 		q.pop();
-		for (int i = 0; i < n; i++)
+
+		// Find all non-colored adjacent vertices
+		for (int v = 0; v < V; ++v)
 		{
-			if (v[i][k] == 1)
+			// An edge from u to v exists and destination v is not colored
+			if (G[u][v] && colorArr[v] == -1)
 			{
-				if (col[k] == 1)
-				{
-					if (col[i] == 0)
-					{
-						col[i] = 2;
-						q.push(i);
-					}
-					else if (col[i] == 1)
-					{
-						return 0;
-					}
-				}
-				else
-				{
-					if (col[i] == 0)
-					{
-						col[i] = 1;
-						q.push(i);
-					}
-					else if (col[i] == 2)
-					{
-						return 0;
-					}
-				}
+				colorArr[v] = 1 - colorArr[u];
+				q.push(v);
 			}
+
+			else if (G[u][v] && colorArr[v] == colorArr[u])
+				return false;
 		}
 	}
-	return 1;
+
+	return true;
+}
+
+// Returns true if a Graph G[][] is Bipartite or not. Note
+// that G may not be connected.
+bool isBipartite(int G[][V])
+{
+	// Create a color array to store colors assigned
+	// to all vertices. Vertex number is used as index in
+	// this array. The value '-1' of colorArr[i]
+	// is used to indicate that no color is assigned to
+	// vertex 'i'. The value 1 is used to indicate first
+	// color is assigned and value 0 indicates
+	// second color is assigned.
+	int colorArr[V];
+	for (int i = 0; i < V; ++i)
+		colorArr[i] = -1;
+
+	// One by one check all not yet colored vertices.
+	for (int i = 0; i < V; i++)
+		if (colorArr[i] == -1)
+			if (isBip(G, i, colorArr) == false)
+				return false;
+
+	return true;
+}
+
+// Returns true if G can be divided into
+// two Cliques, else false.
+bool canBeDividedinTwoCliques(int G[][V])
+{
+	// Find complement of G[][]
+	// All values are complemented except
+	// diagonal ones
+	int GC[V][V];
+	for (int i = 0; i < V; i++)
+		for (int j = 0; j < V; j++)
+			GC[i][j] = (i != j) ? !G[i][j] : 0;
+
+	// Return true if complement is Bipartite
+	// else false.
+	return isBipartite(GC);
 }
 
 int main()
 {
-	ifstream inputFile("input3.txt");
-	ofstream outputFile("output3.txt");
-
-	if (!inputFile.is_open())
+#ifndef ONLINE_JUDGE
+	freopen("input3.txt", "r", stdin);
+	freopen("output3.txt", "w", stdout);
+#endif
+	int G[V][V];
+	for (int i = 0; i < V; i++)
 	{
-		cerr << "Error opening input file." << endl;
-		return 1;
-	}
-
-	if (!outputFile.is_open())
-	{
-		cerr << "Error opening output file." << endl;
-		return 1;
-	}
-	int n;
-	inputFile >> n;
-	vector<vector<bool>> v(n, vector<bool>(n, 0));
-	for (int i = 0; i < n; i++)
-	{
-		for (int j = 0; j < n; j++)
+		for (int j = 0; j < V; j++)
 		{
-			bool k;
-			inputFile >> k;
-
-			v[i][j] = !k;
-			if (i == j)
-			{
-				v[i][j] = 0;
-			}
+			cin >> G[i][j];
 		}
 	}
-	if (is_bi(v))
-	{
-		outputFile << "YES" << endl;
-	}
-	else
-	{
-		outputFile << "NO" << endl;
-	}
+
+	canBeDividedinTwoCliques(G) ? cout << "Yes" : cout << "No";
 	return 0;
 }

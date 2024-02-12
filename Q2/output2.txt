@@ -1,0 +1,1 @@
+Minimum number of throws is: 4

@@ -1,81 +1,72 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <map>
+#include <queue>
+
 using namespace std;
 
-bool v[100000];
-int BFS(int move[], int n)
+int calculateMinimumThrows(int numPlayers, vector<int> &playerPositions)
 {
+    map<int, int> snakes, ladders;
 
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < 2 * numPlayers; i += 2)
     {
-        v[i] = false;
+        if (playerPositions[i] < playerPositions[i + 1])
+        {
+            ladders[playerPositions[i] - 1] = playerPositions[i + 1] - 1;
+        }
+        else
+        {
+            snakes[playerPositions[i] - 1] = playerPositions[i + 1] - 1;
+        }
     }
-    queue<pair<int, int>> q;
-    v[0] = 1;
-    pair<int, int> s = {0, 0};
-    q.push(s);
 
-    pair<int, int> p;
+    queue<pair<int, int>> q;
+    vector<bool> visited(30, false);
+    visited[0] = true;
+    q.push({0, 0});
+
     while (!q.empty())
     {
-        p = q.front();
-        int k = p.first;
-        if (k == n - 1)
-        {
-            break;
-        }
-
+        pair<int, int> current = q.front();
         q.pop();
-        for (int j = k + 1; j <= (k + 6) && j < n; j++)
+        if (current.first == 29)
         {
-            if (!v[j])
+            return current.second;
+        }
+        for (int currentPosition = current.first + 1; currentPosition <= min(current.first + 6, 29); currentPosition++)
+        {
+            int newPosition = currentPosition;
+            if (ladders.count(newPosition))
             {
-                pair<int, int> a;
-                a.second = (p.second + 1);
-                v[j] = 1;
-                if (move[j] != -1)
-                {
-                    a.first = move[j];
-                }
-                else
-                {
-                    a.first = j;
-                }
-                q.push(a);
+                newPosition = ladders[newPosition];
+            }
+            else if (snakes.count(newPosition))
+            {
+                newPosition = snakes[newPosition];
+            }
+            if (!visited[newPosition])
+            {
+                visited[newPosition] = true;
+                q.push({newPosition, current.second + 1});
             }
         }
     }
-    return p.second;
 }
 
 int main()
 {
-    ifstream inputFile("input2.txt");
-    ofstream outputFile("output2.txt");
-
-    if (!inputFile.is_open())
-    {
-        cerr << "Error opening input file." << endl;
-        return 1;
-    }
-
-    if (!outputFile.is_open())
-    {
-        cerr << "Error opening output file." << endl;
-        return 1;
-    }
-    int n, l, s;
-    inputFile >> n >> l >> s;
-    int move[n];
-    for (int i = 0; i < n; i++)
-    {
-        move[i] = -1;
-    }
-    for (int i = 0; i < l + s; i++)
-    {
-        int a, b;
-        inputFile >> a >> b;
-        move[a - 1] = b - 1;
-    }
-    outputFile << BFS(move, n) << endl;
+    freopen("input2.txt", "r", stdin);
+    freopen("output2.txt", "w", stdout);
+    
+        int numPlayers;
+        cin >> numPlayers;
+        vector<int> playerPositions(2 * numPlayers);
+        for (int i = 0; i < 2 * numPlayers; i++)
+        {
+            cin >> playerPositions[i];
+        }
+        cout << "Minimum number of throws is: " << calculateMinimumThrows(numPlayers, playerPositions) << endl;
+    
     return 0;
 }
